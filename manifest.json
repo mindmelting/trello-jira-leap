@@ -1,0 +1,17 @@
+{
+  "name": "Leap Extension",
+  "version": "0.1",
+  "description": "Trello Leap.",
+  "permissions": ["activeTab"],
+  "background": {
+    "scripts": ["main.js"],
+    "persistant": false
+  },
+  "browser_action": {
+    "default_title": "Leap!"
+  },
+  "web_accessible_resources": [
+    "main-leap.js"
+  ],
+  "manifest_version": 2
+}
