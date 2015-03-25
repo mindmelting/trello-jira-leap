@@ -75,11 +75,10 @@ d.prototype={resetTimers:function(){this.timeSinceLastFrame=0,this.lastFrameTime
         this.fill = 'red';
     }
     Shape.prototype.draw = function() {
-        this.ctx.fillStyle = this.fill;
-        this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, true); 
-        this.ctx.closePath();
-        this.ctx.fill();
+        var img = new Image();
+
+        img.src = 'https://cdn2.iconfinder.com/data/icons/hawcons-gesture-stroke/32/icon_3_high_five-24.png';
+        this.ctx.drawImage(img, this.x, this.y, 24, 24);
     };
     Shape.prototype.processGrab = function(strength) {
         this.grab = (strength === 1);
