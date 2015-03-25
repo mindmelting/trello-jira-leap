@@ -1,17 +1,17 @@
 {
   "manifest_version": 2,
-  "name": "Leap Motion for Trello",
-  "short_name": "Leap Trello",
+  "name": "Leap Motion for Trello and JIRA",
+  "short_name": "Leap Trello/ JIRA",
   "version": "0.1",
 
-  "description": "Grab Trello cards with Leap Motion controller.",
+  "description": "Grab Trello and JIRA cards with Leap Motion controller.",
   "permissions": ["activeTab"],
   "background": {
     "scripts": ["main.js"],
     "persistant": false
   },
   "browser_action": {
-    "default_title": "Leap for Trello"
+    "default_title": "Leap for Trello/ JIRA"
   },
   "web_accessible_resources": [
     "main-leap.js"
