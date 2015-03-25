@@ -1,4 +1,4 @@
-# trello-leap
+# trello-jira-leap
 Leap Motion for use with Trello and JIRA cards.
 
 * Run extension on Trello/Jira board page.
