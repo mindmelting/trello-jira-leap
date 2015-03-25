@@ -1,17 +1,19 @@
 {
-  "name": "Leap Extension",
+  "manifest_version": 2,
+  "name": "Leap Motion for Trello",
+  "short_name": "Leap Trello",
   "version": "0.1",
-  "description": "Trello Leap.",
+
+  "description": "Grab Trello cards with Leap Motion controller.",
   "permissions": ["activeTab"],
   "background": {
     "scripts": ["main.js"],
     "persistant": false
   },
   "browser_action": {
-    "default_title": "Leap!"
+    "default_title": "Leap for Trello"
   },
   "web_accessible_resources": [
     "main-leap.js"
-  ],
-  "manifest_version": 2
+  ]
 }

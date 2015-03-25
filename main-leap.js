@@ -34,7 +34,10 @@ d.prototype={resetTimers:function(){this.timeSinceLastFrame=0,this.lastFrameTime
 
 
 (function (Leap, document, window){
-
+    /**
+     * CanvasElement A wrapper around the canvas element
+     * @param {Element} elementToAppend Element to append the canvas element to
+     */
     function CanvasElement(elementToAppend) {
         var canvasEl = document.createElement('canvas');
 
@@ -47,23 +50,29 @@ d.prototype={resetTimers:function(){this.timeSinceLastFrame=0,this.lastFrameTime
 
     CanvasElement.prototype.clear = function() {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    }
+    };
 
     CanvasElement.prototype.setWidth = function(width) {
         this.ctx.canvas.width  = width;
-    }
+    };
 
     CanvasElement.prototype.setHeight = function(height) {
         this.ctx.canvas.height  = height;
-    }
+    };
 
-
+    /**
+     * An instance of a shape to draw onto a canvas
+     * @param {CanvasRenderingContext2D} ctx    Canvas context
+     * @param {Float} x      x coordinate
+     * @param {Float} y      y coordinate
+     * @param {Float} radius Radius of circle
+     */
     function Shape(ctx, x, y, radius) {
         this.ctx = ctx;
         this.x = x || 0;
         this.y = y || 0;
         this.radius = radius || 10;
-        this.fill = 'red'
+        this.fill = 'red';
     }
     Shape.prototype.draw = function() {
         this.ctx.fillStyle = this.fill;
@@ -71,12 +80,90 @@ d.prototype={resetTimers:function(){this.timeSinceLastFrame=0,this.lastFrameTime
         this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, true); 
         this.ctx.closePath();
         this.ctx.fill();
-    }
+    };
     Shape.prototype.processGrab = function(strength) {
         this.grab = (strength === 1);
+    };
+
+    /**
+     * Wrapper around a jQuery UI implementation
+     * @param {Object} type Configuration for page e.g. Trello
+     */
+    var JqueryUi = function(type) {
+        this._type = type || {};
+        this._activeCard = null;
+        this._dragging = false;
     }
 
-    
+    JqueryUi.prototype.processCoordinates = function(x, y, grab) {
+        var element = document.elementFromPoint(x,y),
+            card = $(element).parents(this._type.draggableElementClass),
+            event,
+            eventName;
+
+        
+        if (card.length && !card.is(this._activeCard) && !this._dragging) {
+            this._removeActiveClass();
+            this._activeCard = card;
+            this._addActiveClass();
+        }
+        if (this._activeCard) {
+            if (grab) {
+                eventName = (this._dragging ? 'mousemove' : 'mousedown');
+                event = $.Event(eventName, {
+                    clientX: x,
+                    clientY: y,
+                    pageX: x,
+                    pageY: y,
+                    target: this._activeCard[0]
+                });
+                if (this._dragging) {
+                    this._fireEvent('_mouseDrag', event);
+                    
+                } else {
+                    this._fireEvent('_mouseCapture', event);
+                    this._fireEvent('_mouseStart', event);
+                }
+                this._dragging = true;
+
+            } else if (!grab && this._dragging) {
+                event = $.Event('mouseup', {
+                    clientX: x,
+                    clientY: y,
+                    pageX: x,
+                    pageY: y,
+                    target: this._activeCard[0]
+                });
+                this._fireEvent('_mouseStop', event);
+                this._dragging = false;
+            }
+        }
+    };
+
+    JqueryUi.prototype._fireEvent = function(eventName, event) {
+        var widget;
+
+        if (this._activeCard) {
+            widget = this._activeCard.data().sortableItem;
+            try {
+                widget[eventName](event);
+            } catch(err) {
+                console.log(err, eventName, event);
+            }
+        }
+    };
+
+    JqueryUi.prototype._removeActiveClass = function() {
+        if (this._activeCard) {
+            this._activeCard.removeClass(this._type.activeClass.replace('.',''));
+        }
+    };
+
+    JqueryUi.prototype._addActiveClass = function() {
+        if (this._activeCard) {
+            this._activeCard.addClass(this._type.activeClass.replace('.',''));
+        }
+    };
 
     function onFrame(frame) {
         var hand,
@@ -91,85 +178,20 @@ d.prototype={resetTimers:function(){this.timeSinceLastFrame=0,this.lastFrameTime
             point.y = (1 - normalizedPosition[1]) * canvasHeight;
             canvas.clear();
             point.draw();
-            TRELLO.processCoordinates(point.x, point.y);
+            jqueryUi.processCoordinates(point.x, point.y, point.grab);
         }
     }
 
     var TRELLO = {
-        processCoordinates: function(x, y) {
-            var element = document.elementFromPoint(x,y),
-                card = $(element).parents('.list-card'),
-                event,
-                eventName;
-
-            if (card.length) {
-                if (!card.is(this.activeCard) && !this.dragging) {
-                    this.removeActiveClass(this.activeCard);
-                    this.addActiveClass(card);
-                    this.activeCard = card;
-                }
-            }
-            if (this.activeCard) {
-                if (point.grab) {
-                    eventName = (this.dragging ? 'mousemove' : 'mousedown');
-                    event = $.Event(eventName, {
-                        clientX: x,
-                        clientY: y,
-                        pageX: x,
-                        pageY: y,
-                        target: this.activeCard[0]
-                    });
-                    if (this.dragging) {
-                        // widget._mouseDownEvent = this.mouseDownEvent;
-                        this.fireEvent('_mouseDrag', event);
-                        
-                    } else {
-                        // this.mouseDownEvent = event;
-                        this.fireEvent('_mouseCapture', event);
-                        this.fireEvent('_mouseStart', event);
-                    }
-                    this.dragging = true;
-
-                } else if (!point.grab && this.dragging) {
-                    event = $.Event('mouseup', {
-                        clientX: x,
-                        clientY: y,
-                        pageX: x,
-                        pageY: y,
-                        target: this.activeCard[0]
-                    });
-                    this.fireEvent('_mouseStop', event);
-                    this.dragging = false;
-                }
-            }
-            
-        },
-        fireEvent: function(eventName, event) {
-            var widget;
-
-            if (this.activeCard) {
-                widget = this.activeCard.data().sortableItem;
-                try {
-                    widget[eventName](event);
-                } catch(err) {
-                    console.log(err, eventName, event);
-                }
-            }  
-        },
-        removeActiveClass: function(card) {
-            if (card) {
-                card.removeClass('active-card');    
-            }
-        },
-        addActiveClass: function(card) {
-            card.addClass('active-card');
-        }
-    }
+        draggableElementClass: '.list-card',
+        activeClass: '.active-card'
+    };
 
     var canvasWidth = window.innerWidth,
         canvasHeight = window.innerHeight,
         canvas = new CanvasElement(document.body),
-        point = new Shape(canvas.ctx, 0, 0, 5);
+        point = new Shape(canvas.ctx, 0, 0, 5),
+        jqueryUi = new JqueryUi(TRELLO);
 
     canvas.setWidth(canvasWidth);
     canvas.setHeight(canvasHeight);
