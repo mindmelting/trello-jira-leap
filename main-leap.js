@@ -74,6 +74,7 @@ d.prototype={resetTimers:function(){this.timeSinceLastFrame=0,this.lastFrameTime
         this.radius = radius || 10;
         this.fill = 'red';
     }
+    
     Shape.prototype.draw = function() {
         this.ctx.fillStyle = this.fill;
         this.ctx.beginPath();
@@ -81,6 +82,7 @@ d.prototype={resetTimers:function(){this.timeSinceLastFrame=0,this.lastFrameTime
         this.ctx.closePath();
         this.ctx.fill();
     };
+
     Shape.prototype.processGrab = function(strength) {
         this.grab = (strength === 1);
     };
